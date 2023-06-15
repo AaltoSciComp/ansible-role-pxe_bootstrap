@@ -1,10 +1,12 @@
 ---
 # defaults file for ansible-role-pxe_bootstrap
 
-repo_location: "http://www.nic.funet.fi/pub/mirrors/centos.org/7/os/x86_64/"
+repo_location: "http://www.nic.funet.fi/pub/mirrors/centos.org/7/os/x86_64/os"
 pxe_bootstrap_packages:
  - httpd
- - xinetd
  - tftp-server
 pxe_bootstrap_upgrade_img: False
 pxe_bootstrap_selinux: True
+
+tftp_service: 'tftp.socket'
+httpd_service: 'httpd'

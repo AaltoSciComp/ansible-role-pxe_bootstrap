@@ -5,8 +5,9 @@ import socket
 import json
 import syslog
 sys.stderr = sys.stdout
-print "Content-Type: text/plain"
-print
+
+print("Content-Type: text/plain")
+print("")
 
 pxe_header = "#!ipxe"
 if "gPXE" in os.environ["HTTP_USER_AGENT"]:
@@ -14,8 +15,8 @@ if "gPXE" in os.environ["HTTP_USER_AGENT"]:
 
 def pxe_abort():
   """Abort the PXE boot, continue with the next boot device in the BIOS boot order"""
-  print pxe_header
-  print "exit"
+  print(pxe_header)
+  print("exit")
   sys.exit(0)
 
 try:
@@ -36,10 +37,10 @@ try:
   if 'serialport' in nodesettings:
     serialport = nodesettings['serialport']
 
-  print pxe_header
-  print "kernel http://" + nodesettings["kickstart_server_ip"] + "/ks/vmlinuz ks=http://" + nodesettings["kickstart_server_ip"] + "/ks/" + nodesettings["kickstart_profile"] + " edd=off ksdevice=bootif kssendmac console=" + serialport + ",115200 console=tty0 initrd=initrd.img"
-  print "initrd http://" + nodesettings["kickstart_server_ip"] + "/ks/initrd.img"
-  print "boot"
+  print (pxe_header)
+  print ("kernel http://" + nodesettings["kickstart_server_ip"] + "/ks/vmlinuz inst.repo=https://nic.funet.fi/pub/Linux/INSTALL/rockylinux/9.2/BaseOS/x86_64/os inst.ks=http://" + nodesettings["kickstart_server_ip"] + "/ks/" + nodesettings["kickstart_profile"] + " edd=off ksdevice=bootif kssendmac console=" + serialport + ",115200 console=tty0 ramdisk_size=10000 net.ifnames=0 biosdevname=0 ipv6.disable=1 initrd=initrd.img ip=dhcp")
+  print ("initrd http://" + nodesettings["kickstart_server_ip"] + "/ks/initrd.img")
+  print ("boot")
 
 except Exception as e:
   syslog.syslog(syslog.LOG_ERR, str(e)  + " hostname wasn't found in /var/www/provision/nodes/pxe_nodes.json")
