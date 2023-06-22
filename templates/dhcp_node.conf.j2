@@ -1,0 +1,41 @@
+# Hosts in stateful_pxe
+{% for item in groups['stateful_pxe'] %}
+host {{ item }} {
+  hardware ethernet {{ hostvars[item]['mac_address'] }};
+  fixed-address {{  hostvars[item]['int_ip_addr'] }};
+  send host-name "{{ item }}.{{ dhcp_common_domain }}";
+  next-server {{ dhcp_tftp_server_ip }};
+
+  if exists user-class and (option user-class = "iPXE"
+     or option user-class = "gPXE") {
+    filename "http://{{ dhcp_tftp_server_ip }}/cgi-bin/boot.py";
+  } elsif option arch = 00:00 {
+    # Legacy x86 BIOS
+    filename "undionly.kpxe";
+  } else {
+    # UEFI 64-bit
+    filename "snponly.efi";
+  }
+}
+{% endfor %}
+
+# Hosts in kvm_vms
+{% for item in groups['kvm_vms'] %}
+host {{ item }} {
+  hardware ethernet {{ hostvars[item]['mac_address'] }};
+  fixed-address {{  hostvars[item]['int_ip_addr'] }};
+  send host-name "{{ item }}.{{ dhcp_common_domain }}";
+  next-server {{ dhcp_tftp_server_ip }};
+
+  if exists user-class and (option user-class = "iPXE"
+     or option user-class = "gPXE") {
+    filename "http://{{ dhcp_tftp_server_ip }}/cgi-bin/boot.py";
+  } elsif option arch = 00:00 {
+    # Legacy x86 BIOS
+    filename "undionly.kpxe";
+  } else {
+    # UEFI 64-bit
+    filename "snponly.efi";
+  }
+}
+{% endfor %}

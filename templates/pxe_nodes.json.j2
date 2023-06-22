@@ -1,0 +1,10 @@
+{
+{% for item in groups['stateful_pxe'] %}
+  "{{ item }}": {
+    "kickstart_profile": "{{ item }}.ks",
+    "kickstart_server_ip": "{{ hostvars[item]['kickstart_server_ip'] }}"
+  }{% if not loop.last %},
+{% endif %}
+{% endfor %}
+
+}

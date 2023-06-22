@@ -1,16 +1,40 @@
 ---
+
+## General packages 
+
 - name: install package dependencies
   package: name="{{ item }}" state=present
   with_items: "{{ pxe_bootstrap_packages }}"
+
+## DHCP
+
+- name: Install DHCP server
+  package: name=dhcp-server state=installed
+
+- name: Generate dhcpd.conf
+  template: src=dhcpd.conf.j2 dest={{ dhcp_server_config }} owner=root group=root mode=0644 validate='/usr/sbin/dhcpd -t -cf %s'
+  notify:
+    - restart dhcpd
+
+- name: create_dhcpd_config_dir
+  file: path=/etc/dhcp/dhcpd.d state=directory owner=root group=root mode="0755"
+
+- name: copy_dhcp_pxe_option_config
+  copy: src=ipxe.conf dest=/etc/dhcp/dhcpd.d/ipxe.conf owner=root group=root mode="0644"
+
+- name: template create_dhcp_configs
+  template: src=dhcp_node.conf.j2 dest="/etc/dhcp/dhcpd.d/nodes.conf"
+  notify:
+    - restart dhcpd
+
+
+## TFTP
 
 - name: Enable and start tftp.socket
   service: 
     name: "{{ tftp_service }}"
     state: started
     enabled: true
-
-#- name: configure_tftp
-#  lineinfile: dest=/etc/xinetd.d/tftp regexp="disable" line="        disable                 = no"
 
 - name: copy undionly.kpxe chainboot
   copy: src=undionly.kpxe dest=/var/lib/tftpboot/undionly.kpxe owner=root group=root mode="0644"
@@ -26,6 +50,8 @@
   command: restorecon -Rv /var/lib/tftpboot/
   when: pxe_bootstrap_selinux|bool
 
+## WWW
+
 - name: copy in the pxe_bootscript
   copy: src=boot.py dest=/var/www/cgi-bin/boot.py owner=apache group=apache mode="0550"
 
@@ -38,21 +64,14 @@
 - name: download PXE vmlinuz file
   get_url: url="{{ repo_location}}/images/pxeboot/vmlinuz" dest=/var/www/html/ks/vmlinuz force=yes owner=apache group=apache mode="0550"
 
-#- name: download PXE upgrade.img file
-#  get_url: url="{{ repo_location}}/images/pxeboot/upgrade.img" dest=/var/www/html/ks/upgrade.img force=yes owner=apache group=apache mode="0550"
-#  when: pxe_bootstrap_upgrade_img|bool
-
-- name: create_dhcpd_config_dir
-  file: path=/etc/dhcp/dhcpd.d state=directory owner=root group=root mode="0755"
-
-- name: copy_dhcp_pxe_option_config
-  copy: src=ipxe.conf dest=/etc/dhcp/dhcpd.d/ipxe.conf owner=root group=root mode="0644"
-
 - name: create_pxe_directory_structure
   file: path=/var/www/provision state=directory owner=root group=root mode="0755"
 
 - name: create_pxe_directory_structure
   file: path=/var/www/provision/nodes state=directory owner=apache group=apache mode="0755"
+
+- name: template pxe boot data json file
+  template: src='pxe_nodes.json.j2' dest='/var/www/provision/nodes/pxe_nodes.json'
 
 - name: create_pxe_directory_structure
   file: path=/var/www/provision/reinstall state=directory owner=apache group=apache mode="0755"
@@ -60,9 +79,10 @@
 - name: apache_selinux_context
   command: restorecon -Rv /var/www/provision/
 
+- name: template over kickstart file
+  template: src="kickstart.cfg" dest="{{ ksBootSrvDir }}/{{ item }}.ks" owner=apache group=apache mode=0644
+  with_items: "{{ groups['stateful_pxe'] }}"
+
 - name: start and enable httpd service
   service: name=httpd state=started enabled=yes
-
-#- name: start and enable xinetd service
-#  service: name=xinetd state=started enabled=yes
 

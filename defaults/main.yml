@@ -1,4 +1,6 @@
 ---
+
+
 # defaults file for ansible-role-pxe_bootstrap
 
 repo_location: "http://www.nic.funet.fi/pub/mirrors/centos.org/7/os/x86_64/os"
@@ -10,3 +12,41 @@ pxe_bootstrap_selinux: True
 
 tftp_service: 'tftp.socket'
 httpd_service: 'httpd'
+
+
+ksBootSrvDir: "/var/www/html/ks"
+intDomain: "int"
+
+hosts_file_pxe_group_to_populate: "{{ groups.pxe_bootable_nodes }}"
+hosts_file_admin_group_to_populate: "{{ groups.admin }}"
+hosts_file_install_group_to_populate: "{{ groups.install }}"
+hosts_file_login_group_to_populate: "{{ groups.login }}"
+hosts_file_extra_group_to_populate: ""
+
+#hosts_file_inventory_location points to where the ansible inventory file is
+hosts_file_group_to_populate: "pxe_bootable_nodes"
+hosts_file_inventory_location: "hosts"
+
+dhcp_common_domain: "example.com"
+dhcp_tftp_server_ip: "10.1.1.2"
+
+
+kickstart_extra_post_commands: |
+ "echo no extra kickstart post commands defined"
+
+# Should kickstart set up the serial console
+serial_console_enable: false
+
+kickstart_packages: ['']
+
+dhcp_server_config: /etc/dhcp/dhcpd.conf
+dhcp_service_config: /etc/sysconfig/dhcpd
+
+dhcp_interfaces: br_int
+dhcp_subnets: []
+dhcp_hosts: []
+dhcp_classes: []
+dhcp_shared_networks: []
+dhcp_common_options: []
+dhcp_common_domain: "example.com"
+dhcp_tftp_server_ip: "10.1.1.1"
