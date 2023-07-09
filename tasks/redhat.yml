@@ -11,21 +11,22 @@
 - name: Install DHCP server
   package: name=dhcp-server state=installed
 
-- name: Generate dhcpd.conf
-  template: src=dhcpd.conf.j2 dest={{ dhcp_server_config }} owner=root group=root mode=0644 validate='/usr/sbin/dhcpd -t -cf %s'
-  notify:
-    - restart dhcpd
-
 - name: create_dhcpd_config_dir
   file: path=/etc/dhcp/dhcpd.d state=directory owner=root group=root mode="0755"
-
-- name: copy_dhcp_pxe_option_config
-  copy: src=ipxe.conf dest=/etc/dhcp/dhcpd.d/ipxe.conf owner=root group=root mode="0644"
 
 - name: template create_dhcp_configs
   template: src=dhcp_node.conf.j2 dest="/etc/dhcp/dhcpd.d/nodes.conf"
   notify:
     - restart dhcpd
+
+- name: copy_dhcp_pxe_option_config
+  copy: src=ipxe.conf dest=/etc/dhcp/dhcpd.d/ipxe.conf owner=root group=root mode="0644"
+
+- name: Generate dhcpd.conf
+  template: src=dhcpd.conf.j2 dest={{ dhcp_server_config }} owner=root group=root mode=0644 validate='/usr/sbin/dhcpd -t -cf %s'
+  notify:
+    - restart dhcpd
+
 
 
 ## TFTP
