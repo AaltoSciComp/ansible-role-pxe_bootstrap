@@ -38,7 +38,7 @@ try:
     serialport = nodesettings['serialport']
 
   print (pxe_header)
-  print ("kernel http://" + nodesettings["kickstart_server_ip"] + "/ks/vmlinuz inst.repo=https://nic.funet.fi/pub/Linux/INSTALL/rockylinux/9.2/BaseOS/x86_64/os inst.ks=http://" + nodesettings["kickstart_server_ip"] + "/ks/" + nodesettings["kickstart_profile"] + " edd=off ksdevice=bootif kssendmac console=" + serialport + ",115200 console=tty0 ramdisk_size=10000 net.ifnames=0 biosdevname=0 ipv6.disable=1 initrd=initrd.img ip=dhcp")
+  print ("kernel http://" + nodesettings["kickstart_server_ip"] + "/ks/vmlinuz inst.repo=https://nic.funet.fi/pub/Linux/INSTALL/rockylinux/9.2/BaseOS/x86_64/os inst.ks=http://" + nodesettings["kickstart_server_ip"] + "/ks/" + nodesettings["kickstart_profile"] + " console=" + serialport + ",115200 console=tty0 ramdisk_size=10000 net.ifnames=0 biosdevname=0 ipv6.disable=1 initrd=initrd.img ip=dhcp")
   print ("initrd http://" + nodesettings["kickstart_server_ip"] + "/ks/initrd.img")
   print ("boot")
 
