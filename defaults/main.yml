@@ -27,10 +27,6 @@ hosts_file_extra_group_to_populate: ""
 hosts_file_group_to_populate: "pxe_bootable_nodes"
 hosts_file_inventory_location: "hosts"
 
-dhcp_common_domain: "example.com"
-dhcp_tftp_server_ip: "10.1.1.2"
-
-
 kickstart_extra_post_commands: |
  "echo no extra kickstart post commands defined"
 
