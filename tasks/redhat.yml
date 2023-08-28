@@ -32,8 +32,8 @@
 ## TFTP
 
 - name: Enable and start tftp.socket
-  service: 
-    name: "{{ tftp_service }}"
+  service:
+    name: "{{ tftp_service }}"
     state: started
     enabled: true
 
@@ -60,10 +60,10 @@
   file: path=/var/www/html/ks state=directory owner=apache group=apache mode="0755"
 
 - name: download PXE initrd.img file
-  get_url: url="{{ repo_location}}/images/pxeboot/initrd.img" dest=/var/www/html/ks/initrd.img force=yes owner=apache group=apache mode="0550"
+  get_url: url="{{ repo_location }}/images/pxeboot/initrd.img" dest=/var/www/html/ks/initrd.img force=yes owner=apache group=apache mode="0550"
 
 - name: download PXE vmlinuz file
-  get_url: url="{{ repo_location}}/images/pxeboot/vmlinuz" dest=/var/www/html/ks/vmlinuz force=yes owner=apache group=apache mode="0550"
+  get_url: url="{{ repo_location }}/images/pxeboot/vmlinuz" dest=/var/www/html/ks/vmlinuz force=yes owner=apache group=apache mode="0550"
 
 - name: create_pxe_directory_structure
   file: path=/var/www/provision state=directory owner=root group=root mode="0755"
@@ -79,6 +79,7 @@
 
 - name: apache_selinux_context
   command: restorecon -Rv /var/www/provision/
+  when: pxe_bootstrap_selinux|bool
 
 - name: template over kickstart file
   template: src="kickstart.cfg" dest="{{ ksBootSrvDir }}/{{ item }}.ks" owner=apache group=apache mode=0644
