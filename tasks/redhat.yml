@@ -56,14 +56,17 @@
 - name: copy in the pxe_bootscript
   copy: src=boot.py dest=/var/www/cgi-bin/boot.py owner=apache group=apache mode="0550"
 
+- name: create empty html index
+  ansible.builtin.file: path=/var/www/html/index.html state=touch mode=644 modification_time=preserve access_time=preserve
+
 - name: create_ks_dir
-  file: path=/var/www/html/ks state=directory owner=apache group=apache mode="0755"
+  file: path="{{ ksBootSrvDir }}" state=directory owner=apache group=apache mode="0755"
 
 - name: download PXE initrd.img file
-  get_url: url="{{ repo_location }}/images/pxeboot/initrd.img" dest=/var/www/html/ks/initrd.img force=yes owner=apache group=apache mode="0550"
+  get_url: url="{{ pxeboot_location }}/initrd.img" dest="{{ ksBootSrvDir }}/initrd.img" force=yes owner=apache group=apache mode="0550"
 
 - name: download PXE vmlinuz file
-  get_url: url="{{ repo_location }}/images/pxeboot/vmlinuz" dest=/var/www/html/ks/vmlinuz force=yes owner=apache group=apache mode="0550"
+  get_url: url="{{ pxeboot_location }}/vmlinuz" dest="{{ ksBootSrvDir }}/vmlinuz" force=yes owner=apache group=apache mode="0550"
 
 - name: create_pxe_directory_structure
   file: path=/var/www/provision state=directory owner=root group=root mode="0755"

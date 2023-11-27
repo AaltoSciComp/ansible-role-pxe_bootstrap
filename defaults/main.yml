@@ -3,12 +3,14 @@
 
 # defaults file for ansible-role-pxe_bootstrap
 
-repo_location: "http://www.nic.funet.fi/pub/mirrors/centos.org/7/os/x86_64/os"
+repo_location: "https://www.nic.funet.fi/pub/mirrors/rockylinux.org/9/BaseOS/x86_64/os"
+pxeboot_location: "https://www.nic.funet.fi/pub/mirrors/rockylinux.org/9/BaseOS/x86_64/os/images/pxeboot"
 pxe_bootstrap_packages:
  - httpd
  - tftp-server
 pxe_bootstrap_upgrade_img: False
 pxe_bootstrap_selinux: True
+pxe_urlbase: "ks"
 
 tftp_service: 'tftp.socket'
 httpd_service: 'httpd'
