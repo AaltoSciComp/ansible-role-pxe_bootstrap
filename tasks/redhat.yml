@@ -38,10 +38,10 @@
     enabled: true
 
 - name: copy undionly.kpxe chainboot
-  copy: src=undionly.kpxe dest=/var/tftp/undionly.kpxe owner=root group=root mode="0644"
+  copy: src=undionly.kpxe dest="{{ tftpdir }}/undionly.kpxe" owner=root group=root mode="0644"
 
 - name: copy snponly.efi (UEFI 64-bit) chainboot
-  copy: src=snponly.efi dest=/var/tftp/snponly.efi owner=root group=root mode="0644"
+  copy: src=snponly.efi dest="{{ tftpdir }}/snponly.efi" owner=root group=root mode="0644"
 
 - name: install selinux package
   package: name="policycoreutils" state=present
@@ -59,14 +59,17 @@
 - name: create empty html index
   ansible.builtin.file: path=/var/www/html/index.html state=touch mode=644 modification_time=preserve access_time=preserve
 
-- name: create_ks_dir
-  file: path="{{ ksBootSrvDir }}" state=directory owner=apache group=apache mode="0755"
+- name: create kickstart dirs
+  ansible.builtin.file: path="{{ item.value.ksBootSrvDir }}" state=directory owner=apache group=apache mode="0755"
+  loop: "{{ pxe_profile | dict2items }}"
 
 - name: download PXE initrd.img file
-  get_url: url="{{ pxeboot_location }}/initrd.img" dest="{{ ksBootSrvDir }}/initrd.img" force=yes owner=apache group=apache mode="0550"
+  get_url: url="{{ item.value.pxeboot_location }}/initrd.img" dest="{{ item.value.ksBootSrvDir }}/initrd.img" force=yes owner=apache group=apache mode="0550"
+  loop: "{{ pxe_profile | dict2items }}"
 
 - name: download PXE vmlinuz file
-  get_url: url="{{ pxeboot_location }}/vmlinuz" dest="{{ ksBootSrvDir }}/vmlinuz" force=yes owner=apache group=apache mode="0550"
+  get_url: url="{{ item.value.pxeboot_location }}/vmlinuz" dest="{{ item.value.ksBootSrvDir }}/vmlinuz" force=yes owner=apache group=apache mode="0550"
+  loop: "{{ pxe_profile | dict2items }}"
 
 - name: create_pxe_directory_structure
   file: path=/var/www/provision state=directory owner=root group=root mode="0755"
@@ -85,7 +88,7 @@
   when: pxe_bootstrap_selinux|bool
 
 - name: template over kickstart file
-  template: src="kickstart.cfg" dest="{{ ksBootSrvDir }}/{{ item }}.ks" owner=apache group=apache mode=0644
+  template: src="kickstart.cfg" dest="{{ pxe_profile[hostvars[item]['pxeos']].ksBootSrvDir }}/{{ item }}.ks" owner=apache group=apache mode=0644
   with_items: "{{ groups['stateful_pxe'] }}"
 
 - name: start and enable httpd service

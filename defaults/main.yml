@@ -18,6 +18,7 @@ httpd_service: 'httpd'
 
 ksBootSrvDir: "/var/www/html/ks"
 intDomain: "int"
+tftpdir: /var/tftp
 
 hosts_file_pxe_group_to_populate: "{{ groups.pxe_bootable_nodes }}"
 hosts_file_admin_group_to_populate: "{{ groups.admin }}"
@@ -48,3 +49,13 @@ dhcp_shared_networks: []
 dhcp_common_options: []
 dhcp_common_domain: "example.com"
 dhcp_tftp_server_ip: "10.1.1.1"
+
+# Set default os for deployment and hash values where to get needed boot images and boot params
+pxeos: "rocky"
+pxe_profile:
+  rocky:
+    pxeboot_location: "https://www.nic.funet.fi/pub/mirrors/rockylinux.org/9/BaseOS/x86_64/os/images/pxeboot"
+    repo_location: "https://www.nic.funet.fi/pub/mirrors/rockylinux.org/9/BaseOS/x86_64/os"
+    ksBootSrvDir: "/var/www/html/ksrocky"
+    pxe_kernel_args: "inst.repo=https://nic.funet.fi/pub/Linux/INSTALL/rockylinux/9/BaseOS/x86_64/os/ ramdisk_size=10000 net.ifnames=0 biosdevname=0 ipv6.disable=1 initrd=initrd.img ip=dhcp"
+    url: "http://192.168.0.1/ksrocky"

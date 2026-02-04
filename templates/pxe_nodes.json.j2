@@ -2,8 +2,8 @@
 {% for item in groups['stateful_pxe'] %}
   "{{ item }}": {
     "kickstart_profile": "{{ item }}.ks",
-    "kickstart_kernel_args": "{{ pxe_kernel_args }}",
-    "kickstart_server_url": "http://{{ hostvars[item]['kickstart_server_ip'] }}/{{ pxe_urlbase }}"
+    "kickstart_kernel_args": "{{ pxe_profile[hostvars[item]['pxeos']].pxe_kernel_args }}",
+    "kickstart_server_url": "{{ pxe_profile[hostvars[item]['pxeos']].url }}"
   }{% if not loop.last %},
 {% endif %}
 {% endfor %}
