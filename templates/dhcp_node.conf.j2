@@ -12,6 +12,9 @@ host {{ item }} {
   } elsif option arch = 00:00 {
     # Legacy x86 BIOS
     filename "undionly.kpxe";
+  } elsif option arch = 00:0b {
+    # arm 64
+    filename "ipxe_arm64.efi";
   } else {
     # UEFI 64-bit
     filename "snponly.efi";

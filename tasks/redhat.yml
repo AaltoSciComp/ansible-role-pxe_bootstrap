@@ -43,6 +43,9 @@
 - name: copy snponly.efi (UEFI 64-bit) chainboot
   copy: src=snponly.efi dest="{{ tftpdir }}/snponly.efi" owner=root group=root mode="0644"
 
+- name: copy ipxe_arm64.efi chainboot
+  copy: src=ipxe_arm64.efi dest="{{ tftpdir }}/ipxe_arm64.efi" owner=root group=root mode="0644"
+
 - name: install selinux package
   package: name="policycoreutils" state=present
   when: pxe_bootstrap_selinux|bool
