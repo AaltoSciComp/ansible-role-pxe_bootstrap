@@ -1,6 +1,6 @@
 ---
 
-## General packages 
+## General packages
 
 - name: install package dependencies
   package: name="{{ item }}" state=present
@@ -27,6 +27,11 @@
   notify:
     - restart dhcpd
 
+- name: start and enable dhcpd service
+  service:
+    name: dhcpd
+    state: started
+    enabled: yes
 
 
 ## TFTP
