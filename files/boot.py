@@ -1,13 +1,17 @@
 #!/usr/bin/python
-import sys
+import json
 import os
 import socket
-import json
+import sys
 import syslog
+import traceback
+
 sys.stderr = sys.stdout
 
+PXE_NODES = "/var/www/provision/nodes/pxe_nodes.json"
+
 print("Content-Type: text/plain")
-print("")
+print()
 
 pxe_header = "#!ipxe"
 if "gPXE" in os.environ["HTTP_USER_AGENT"]:
@@ -19,29 +23,51 @@ def pxe_abort():
   print("exit")
   sys.exit(0)
 
+remote_addr = os.environ["REMOTE_ADDR"]
+hostname = ""
 try:
   # from the name, e.g. c1-3 take c1-3
-  hostname = socket.gethostbyaddr(os.environ["REMOTE_ADDR"])[0].split(".")[0]
+  hostname = socket.gethostbyaddr(remote_addr)[0].split(".")[0]
+except socket.herror as e:
+  syslog.syslog(syslog.LOG_ERR, f"Could not translate IP '{remote_addr}' to hostname: {e}")
+  pxe_abort()
 
-  try:
-    os.remove("/var/www/provision/reinstall/" + hostname)
-  except OSError as e:
-    syslog.syslog(syslog.LOG_INFO, str(e))
-    pxe_abort()
+try:
+  os.remove("/var/www/provision/reinstall/" + hostname)
+except FileNotFoundError:
+  # File not found -> we don't want a reinstall
+  syslog.syslog(syslog.LOG_INFO, f"Host '{hostname}' is not scheduled for reinstall, skipping")
+  pxe_abort()
+except OSError as e:
+  syslog.syslog(syslog.LOG_INFO, str(e))
+  pxe_abort()
 
-  with open('/var/www/provision/nodes/pxe_nodes.json') as f:
+nodesettings = {}
+try:
+  with open(PXE_NODES) as f:
     j = json.load(f)
   nodesettings = j[hostname]
+except KeyError:
+  syslog.syslog(syslog.LOG_ERR, f"Host '{hostname}' could not be found in {PXE_NODES}")
+  pxe_abort()
 
+try:
   serialport = 'ttyS0'
   if 'serialport' in nodesettings:
     serialport = nodesettings['serialport']
 
-  print (pxe_header)
-  print ("kernel " + nodesettings["kickstart_server_url"] + "/vmlinuz inst.ks=" + nodesettings["kickstart_server_url"] + "/" + nodesettings["kickstart_profile"] + " console=" + serialport + ",115200 console=tty0 " + nodesettings["kickstart_kernel_args"])
-  print ("initrd " + nodesettings["kickstart_server_url"] + "/initrd.img")
-  print ("boot")
+  url = nodesettings["kickstart_server_url"]
+  profile = nodesettings["kickstart_profile"]
+  args = nodesettings["kickstart_kernel_args"]
+  print(pxe_header)
+  print(
+    f"kernel {url}/vmlinuz "
+    f"inst.ks={url}/{profile} "
+    f"console={serialport},115200 console=tty0 {args}"
+  )
+  print("initrd " + nodesettings["kickstart_server_url"] + "/initrd.img")
+  print("boot")
 
-except Exception as e:
-  syslog.syslog(syslog.LOG_ERR, str(e)  + " hostname wasn't found in /var/www/provision/nodes/pxe_nodes.json")
+except Exception:  # noqa: BLE001
+  syslog.syslog(syslog.LOG_ERR, f"Generic error when trying to handle '{hostname}' ({remote_addr}): {traceback.format_exc()}")
   pxe_abort()
